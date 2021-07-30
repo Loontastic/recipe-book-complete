@@ -30,7 +30,6 @@ let requiredProperties = [
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const mongoose = require("mongoose");
-const keys = require("./keys");
 const cookieSession = require("cookie-session");
 
 server.use(
