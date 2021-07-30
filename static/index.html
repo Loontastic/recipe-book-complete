@@ -215,7 +215,9 @@
               <v-layout>
                 <v-flex md2></v-flex>
                 <v-flex xs12 md8 text-xs-center>
-                  <div class="display-1" align="center">Online Recipe Book</div>
+                  <div class="display-1 mb-2" align="center">
+                    Online Recipe Book
+                  </div>
                   <v-layout column>
                     <v-flex v-for="(recipe, index) in filteredRecipes">
                       <v-card class="pa-5 mb-5" elevation="15">
@@ -346,7 +348,9 @@
               <v-layout>
                 <v-flex md2></v-flex>
                 <v-flex xs12 md8 text-xs-center>
-                  <div class="display-1" align="center">Add New Recipe</div>
+                  <div class="display-1 mb-2" align="center">
+                    Add New Recipe
+                  </div>
                   <v-card class="pa-6 mb-5" elevation="15">
                     <div v-if="isLoggedIn()">
                       <form>
@@ -513,7 +517,7 @@
               <v-layout>
                 <v-flex md2></v-flex>
                 <v-flex xs12 md8 text-xs-center>
-                  <div class="display-1" align="center">Pantry</div>
+                  <div class="display-1 mb-2" align="center">Pantry</div>
                   <v-card class="pa-6 mb-5" elevation="15">
                     <div v-if="isLoggedIn()">
                       <div class="title" align="center">
@@ -598,7 +602,7 @@
               <v-layout>
                 <v-flex md2></v-flex>
                 <v-flex xs12 md8 text-xs-center>
-                  <div class="display-1" align="center">Profile</div>
+                  <div class="display-1 mb-2" align="center">Profile</div>
                   <div v-if="selectedUser._id">
                     <div class="title" align="center">User Info</div>
                     <div>
