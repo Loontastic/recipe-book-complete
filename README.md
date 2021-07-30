@@ -1,2 +1,4 @@
-# recipe-book-complete
-This is our Code School final project
+npm install passport
+npm install cors
+npm install mongoose
+npm install express

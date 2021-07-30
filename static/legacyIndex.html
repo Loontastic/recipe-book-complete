@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Recipe Book</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="bar"></div>
+      <header>
+        <div class="header-flex">
+          <h1 @click="switchPage('recipes')">Recipe Book</h1>
+          <div class="header-button-wrap">
+            <button class="recipe-book" @click="switchPage('recipes')">
+              RECIPES
+            </button>
+            <button class="recipe-book" @click="switchPage('pantry')">
+              PANTRY
+            </button>
+            <button
+              class="recipe-book"
+              v-if="isLoggedIn()"
+              @click="switchPage('profile'), getSpecificUser(loggedInUser._id)"
+            >
+              PROFILE
+            </button>
+            <button class="recipe-book" v-on:click="googleLogIn">
+              Sign In
+            </button>
+            <button class="recipe-book" v-on:click="googleLogOut">
+              Log Out
+            </button>
+            <button class="new-recipe" @click="switchPage('new')">
+              NEW RECIPE
+            </button>
+          </div>
+        </div>
+      </header>
+      <div class="hero-image" v-if="page == 'recipes'"></div>
+      <div class="new-hero" v-if="page == 'new'"></div>
+      <div class="pantry-hero" v-if="page == 'pantry'"></div>
+      <div class="pantry-hero" v-if="page == 'profile'"></div>
+      <!--<div class="pantry-hero" v-if="page == 'fullscreen'"></div>-->
+      <main>
+        <!--CODE FOR RECIPES PAGE-->
+        <div v-if="page == 'recipes'">
+          <h2>Online Recipe Book</h2>
+          <div class="search-wrap">
+            <div class="search-bar-container">
+              <input
+                type="text"
+                v-on:keydown.enter="filterLogic()"
+                v-model="searchBar"
+                class="search-bar"
+                placeholder="Search your ingredients"
+              />
+              <button type="submit" v-on:click="filterLogic()">
+                <i class="fa fa-search search-icon"></i>
+              </button>
+            </div>
+            <div class="advanced-search">
+              <button class="search-button" v-on:click="advance = !advance">
+                Advanced Search
+              </button>
+            </div>
+          </div>
+          <div>
+            <!--This is for Advanced Search-->
+            <div v-if="advance" class="advanced-search-border">
+              <span><b>Filter By:</b></span>
+              <!--cookTime Dropdown-->
+              <div class="time-drop" v-on:click="toshiTest">
+                <b>Cook Time:</b>
+                <select class="time-option" v-model="searchTime">
+                  <option v-for="time in times" v-bind:value="time">
+                    {{ time.UIstring }}
+                  </option>
+                </select>
+              </div>
+              <div class="difficulty-flex">
+                <span>Difficulty:</span>
+                <!--Beginner Checkbox-->
+                <br />
+                <div v-for="(difficulty, index) in difficulties">
+                  <input
+                    type="checkbox"
+                    name="grpDifficulty"
+                    v-bind:value="index+1"
+                    v-model="searchDifficulty"
+                  />
+                  <label>{{difficulty}}</label>
+                </div>
+              </div>
+              <div>
+                <span>Recipe Search Type:</span><br />
+                <input
+                  type="radio"
+                  name="recipeSearch"
+                  v-on:click="pantryFilterSelect = 0"
+                  class=""
+                />
+                <label>Search Only With Pantry Items</label>
+                <input
+                  type="radio"
+                  name="recipeSearch"
+                  v-on:click="pantryFilterSelect = 1"
+                />
+                <label>Search For Recipes with Any Pantry Items</label>
+                <input
+                  type="radio"
+                  name="recipeSearch"
+                  v-on:click="pantryFilterSelect = 2"
+                />
+                <label>Search All Recipes</label>
+              </div>
+              <!--Include Search Button to search-->
+              <button class="search-button" v-on:click="filterLogic()">
+                Search Recipes
+              </button>
+            </div>
+          </div>
+          <ul class="main-list">
+            <li v-for="(recipe, index) in filteredRecipes" class="box-around">
+              <div class="each-recipe-wrap">
+                <div class="recipe-wrap">
+                  <!--Recipe Name-->
+                  <h3 class="title">{{ recipe.title }}</h3>
+                  <img v-bind:src="recipe.picture" />
+
+                  <!--Username-->
+                  <div
+                    class=""
+                    v-on:click="getSpecificUser(recipe.user_id), page = 'profile'"
+                  >
+                    Written by {{ recipe.user_name }}
+                  </div>
+                  <!--Cook Time-->
+                  <div class="time">
+                    Cook Time:
+                    <span>
+                      <span v-if="Math.floor(recipe.cookTime / 60) > 1"
+                        >{{ Math.floor(recipe.cookTime / 60) }} hours</span
+                      >
+                      <span
+                        v-else-if="Math.floor(recipe.cookTime / 60) === 0"
+                      ></span>
+                      <span v-else>
+                        {{ Math.floor(recipe.cookTime / 60) }} hour</span
+                      >
+                    </span>
+                    <span
+                      v-if="Math.floor(recipe.cookTime / 60) > 0 && recipe.cookTime %60 >= 1"
+                      >,</span
+                    >
+                    <span>
+                      <span v-if="recipe.cookTime %60 > 1"
+                        >{{recipe.cookTime %60}} minutes
+                      </span>
+                      <span v-else-if="recipe.cookTime %60 === 0"></span>
+                      <span v-else>{{recipe.cookTime %60}} minute </span>
+                    </span>
+                  </div>
+                  <!--Difficulty-->
+                  <div>
+                    Difficulty: {{ difficulties[recipe.difficulty -1] }}
+                  </div>
+                  <!--Description-->
+                  <div>Description: {{ recipe.description }}</div>
+                  <br />
+                  <!--Ingredients-->
+                  <span class="ingredients">Ingredients:</span>
+                  <ul v-for="ingredient in recipe.ingredientList" class="">
+                    <li>
+                      {{ ingredient.quantity }} {{ ingredient.ingredientItem }}
+                    </li>
+                  </ul>
+                  <br />
+                  <!--Instructions-->
+                  <span>Instructions:</span>
+                  <div
+                    v-for="(instruction,index) in recipe.instructions"
+                    class=""
+                  >
+                    <div class="instructions">
+                      {{index+1}}. {{ instruction }}<br />
+                    </div>
+                  </div>
+                  <div
+                    v-on:click="favoriteRecipeLogic(recipe)"
+                    v-bind:class="favoriteStyling(recipe)"
+                  >
+                    <3<3<3<3<3<3<3<3<3<3
+                  </div>
+                  <div v-if="loggedInUser._id == recipe.user_id">
+                    <!--Button for deleteRecipe function-->
+                    <button
+                      class="delete-button"
+                      v-on:click="deleteRecipe(recipe._id, recipe.user_id)"
+                    >
+                      DELETE
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <!--END OF CODE FOR RECIPES PAGE-->
+
+        <!--CODE FOR NEW RECIPE PAGE-->
+        <div v-else-if="page == 'new'">
+          <div class="">
+            <h2>Add Your Recipe:</h2>
+            <div v-if="isLoggedIn()">
+              <form class="input-flex">
+                <!--Input for recipe name-->
+                <div class="name-time">
+                  <div class="recipe-name">
+                    <label><b>Recipe Name:</b></label>
+                    <input
+                      type="text"
+                      v-model="new_title"
+                      class="name"
+                      required
+                    />
+                  </div>
+                  <div class="recipe-time">
+                    <label><b>Time:</b></label>
+                    <div>
+                      <input
+                        type="number"
+                        v-model="new_cookTime_hours"
+                        min="0"
+                        class="hours"
+                        required
+                      />
+                      hours
+                      <input
+                        type="number"
+                        v-model="new_cookTime_minutes"
+                        min="0"
+                        max="59"
+                        required
+                      />
+                      minutes
+                    </div>
+                  </div>
+                </div>
+                <!--Input for description-->
+                <label><b>Description:</b></label>
+                <input type="text" v-model="new_description" />
+                <!--Dropdown for difficulty-->
+                <label><b>Difficulty:</b></label>
+                <select v-model="new_difficulty" required>
+                  <option
+                    v-for="difficulty, num in difficulties"
+                    v-bind:value="num"
+                  >
+                    {{ difficulty }}
+                  </option>
+                </select>
+                <!--Input for cook time-->
+
+                <!--Input list for ingredients-->
+                <label class="ingredients">Ingredients:</label>
+                <div v-for="(ingredient, index) in new_ingredients">
+                  <div>
+                    <p>Ingredient {{index+1}}:</p>
+                    Name:
+                    <input
+                      type="text"
+                      v-model="new_ingredients[index].ingredientItem"
+                      required
+                    />
+                    Quantity:
+                    <input
+                      type="text"
+                      v-model="new_ingredients[index].quantity"
+                      required
+                    />
+                    <button
+                      v-on:click="new_ingredients.push({ingredientItem:'', quantity:'',})"
+                      class="plus-minus"
+                    >
+                      +
+                    </button>
+                    <button
+                      v-if="index > 0"
+                      v-on:click="new_ingredients.splice(index, 1)"
+                      class="plus-minus"
+                    >
+                      -
+                    </button>
+                  </div>
+                </div>
+                <!--Input for instructions-->
+                <label><b>Instructions:</b></label>
+                <ol v-for="(instruction, index) in new_instructions">
+                  <li>
+                    <!--<p>Step {{index+1}}:</p>-->
+                    <input
+                      type="text"
+                      v-model="new_instructions[index]"
+                      required
+                    />
+                    <button
+                      v-on:click="new_instructions.push('')"
+                      class="plus-minus"
+                    >
+                      +
+                    </button>
+                    <button
+                      v-if="index > 0"
+                      v-on:click="new_instructions.splice(index,1)"
+                      class="plus-minus"
+                    >
+                      -
+                    </button>
+                  </li>
+                </ol>
+                <!--Button for createRecipe function-->
+                <button type="submit" v-on:click="createRecipe" class="button">
+                  ADD
+                </button>
+              </form>
+            </div>
+            <div v-else>Please Sign In to Create a Recipe!</div>
+          </div>
+        </div>
+        <!--END OF CODE FOR NEW RECIPE PAGE-->
+
+        <!--CODE FOR USER INGREDIENTS (PANTRY) PAGE-->
+        <div v-else-if="page == 'pantry'">
+          <h2>Pantry</h2>
+          <div v-if="isLoggedIn()">
+            <div class="pantry-list">
+              <!--<div v-show="emptyPantry">Pantry is Empty</div>
+                        <ul v-for="ingredient in userIngredients">
+                            <li>{{ ingredient }}</li>
+                        </ul>-->
+              <div class="new-pantry-item">
+                <div v-if="pantryPage == 'default'">
+                  <!--<div v-for="(ingredient, index) in userIngredients">
+                                    <div v-model="userIngredients[index]">
+                                        {{ ingredient.ingredientItem }}
+                                    </div>
+                                </div>-->
+                  <h3>Current Pantry Items:</h3>
+                  <label>Pantry Items:</label>
+                  <div v-show="emptyPantry">Pantry is Empty</div>
+                  <ul v-for="ingredient in userIngredients">
+                    <li>{{ ingredient }}</li>
+                  </ul>
+                  <button
+                    v-on:click="switchPantryPage('editing'), 
+                                new_userIngredients = deepCopy(userIngredients)"
+                    class="pantry-button"
+                  >
+                    EDIT PANTRY
+                  </button>
+                </div>
+                <!--Editing List-->
+                <div v-else-if="pantryPage == 'editing'">
+                  <h3>Add New Pantry Items:</h3>
+                  <label>Pantry Items:</label>
+                  <div v-for="(ingredient, index) in new_userIngredients">
+                    <div class="p-item-flex">
+                      Item Name:
+                      <input
+                        type="text"
+                        v-model="new_userIngredients[index]"
+                        v-on:keyup.enter="savePantryIngredient(index)"
+                        class="item"
+                      />
+                      <button
+                        v-on:click="new_userIngredients.splice(index,1)"
+                        class="pantry-button"
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-button-wrap">
+                    <button
+                      v-on:click="new_userIngredients.push('')"
+                      class="pantry-button"
+                    >
+                      ADD ITEM
+                    </button>
+                    <button
+                      v-on:click="switchPantryPage('default'), userIngredients = deepCopy(new_userIngredients), uploadPantry(userIngredients)"
+                      class="pantry-button"
+                    >
+                      SAVE
+                    </button>
+                    <button
+                      v-on:click="switchPantryPage('default')"
+                      class="pantry-button"
+                    >
+                      CANCEL
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>Please Sign In to view your Pantry!</div>
+        </div>
+        <!--END OF CODE FOR USER INGREDIENTS (PANTRY) PAGE-->
+
+        <!--CODE FOR PROFILE PAGE-->
+        <div v-else-if="page == 'profile'">
+          <div v-if="isLoggedIn() || selectedUser">
+            <h2>Profile</h2>
+            <div>
+              <h3>User Info</h3>
+              <div>
+                <div>
+                  Profile Picture:<br />
+                  <img
+                    class="box-around"
+                    v-bind:src="selectedUser.profilePic"
+                  />
+                </div>
+                <div>Name: {{selectedUser.name}}<br /></div>
+              </div>
+            </div>
+            <div>
+              <h3>My Created Recipes</h3>
+              <div class="box-around scroll">
+                <div v-for="recipe in recipes">
+                  <div v-if="recipe.user_id == selectedUser._id">
+                    <div class="box-around">
+                      <div>
+                        <!--Recipe Image, using temporary img for now-->
+                        <img v-bind:src="recipe.picture" />
+                      </div>
+                      <div class="">
+                        <div>{{recipe.title}}</div>
+                        <div class="">Written by {{ recipe.user_name }}</div>
+                        <div>Description: {{ recipe.description }}</div>
+                        <div>
+                          Difficulty: {{difficulties[recipe.difficulty -1]}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3>My Saved Recipes</h3>
+              <div class="box-around scroll">
+                <div v-for="recipe in favoritedRecipes">
+                  <div v-if="recipe.user_id == selectedUser._id">
+                    <div class="box-around">
+                      <div>
+                        <!--Recipe Image, using temporary img for now-->
+                        <img v-bind:src="selectedUser.profilePic" />
+                      </div>
+                      <div class="">
+                        <div>{{recipe.title}}</div>
+                        <div class="">Written by {{ recipe.user_name }}</div>
+                        <div>Description: {{ recipe.description }}</div>
+                        <div>
+                          Difficulty: {{difficulties[recipe.difficulty -1]}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--TILDER IF STATEMENT-->
+        </div>
+        <!--END CODE FOR PROFILE PAGE-->
+
+        <!--CODE FOR FULLSCREEN RECIPE PAGE-->
+        <div v-else-if="page == 'fullrecipe'">
+          <div class="recipe-wrap">
+            <!--Recipe Name-->
+            <div class="title">{{ recipe.title }}</div>
+            <!--Username-->
+            <div class="">Written by {{ recipe.user_name }}</div>
+            <!--Cook Time-->
+            <div class="time">
+              Cook Time:
+              <span>
+                <span v-if="Math.floor(recipe.cookTime / 60) > 1"
+                  >{{ Math.floor(recipe.cookTime / 60) }} hours</span
+                >
+                <span v-else-if="Math.floor(recipe.cookTime / 60) === 0"></span>
+                <span v-else> {{ Math.floor(recipe.cookTime / 60) }} hour</span>
+              </span>
+              <span
+                v-if="Math.floor(recipe.cookTime / 60) > 0 && recipe.cookTime %60 >= 1"
+                >,</span
+              >
+              <span>
+                <span v-if="recipe.cookTime %60 > 1"
+                  >{{recipe.cookTime %60}} minutes
+                </span>
+                <span v-else-if="recipe.cookTime %60 === 0"></span>
+                <span v-else>{{recipe.cookTime %60}} minute </span>
+              </span>
+            </div>
+            <!--Difficulty-->
+            <div>Difficulty: {{ difficulties[recipe.difficulty -1] }}</div>
+            <!--Description-->
+            <div>Description: {{ recipe.description }}</div>
+            <br />
+            <!--Ingredients-->
+            <span class="ingredients">Ingredients:</span>
+            <ul v-for="ingredient in recipe.ingredientList" class="">
+              <li>{{ ingredient.quantity }} {{ ingredient.ingredientItem }}</li>
+            </ul>
+            <br />
+            <!--Instructions-->
+            <span>Instructions:</span>
+            <div v-for="(instruction,index) in recipe.instructions" class="">
+              <div class="instructions">
+                {{index+1}}. {{ instruction }}<br />
+              </div>
+            </div>
+            <div
+              v-on:click="favoriteRecipeLogic(recipe)"
+              v-bind:class="favoriteStyling(recipe)"
+            >
+              <3<3<3<3<3<3<3<3<3<3
+            </div>
+            <div v-if="loggedInUser._id == recipe.user_id">
+              <!--Button for deleteRecipe function-->
+              <button
+                class="delete-button"
+                v-on:click="deleteRecipe(recipe._id, recipe.user_id)"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+        <!--END CODE FULLSCREEN RECIPE PAGE-->
+      </main>
+      <footer>
+        <p>Copyright 2021&copy</p>
+      </footer>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

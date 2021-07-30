@@ -1,0 +1,31 @@
+{
+  "dependencies": {
+    "cookie-session": "^1.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.13.2",
+    "node": "^16.4.0",
+    "nodemon": "^2.0.12",
+    "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0",
+    "save": "^2.4.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "name": "recipe-book",
+  "description": "Recipe Book",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loontastic/recipe-book.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Loontastic/recipe-book/issues"
+  },
+  "homepage": "https://github.com/Loontastic/recipe-book#readme"
+}

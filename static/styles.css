@@ -1,0 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.05rem;
+}
+.v-btn--outlined {
+  border: 5px solid #fff;
+}
+
+.drawer {
+  display: none;
+}
+
+ul {
+  list-style-type: none;
+}
+
+@media only screen and (max-width: 800px) {
+  .drawer {
+    display: block;
+  }
+
+  .name-time {
+    flex-direction: column;
+  }
+
+  .search {
+    margin: 0rem;
+  }
+
+  .toolbar {
+    display: none;
+  }
+}
